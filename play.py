@@ -11,11 +11,12 @@ start = 'https://fr.wikipedia.org/wiki/Cookie_(informatique)'
 start_html = f'''
     <html>
     <body style="background-color:red;">
-        <center>
+        <div style="display: grid; place-items: center; height:100%; width:100%">
             <form action="{start}">
-                <input type="submit" value="Commencer" />
+                <input type="submit" value="Commencer" style="
+                    font-size:5em; border-radius:1em"/>
             </form>
-        </center>
+        </div>
     </body>
     </html>
 '''
@@ -23,12 +24,13 @@ mid   = 'https://fr.wikipedia.org/wiki/Europe'
 mid_html = f'''
     <html>
     <body style="background-color:orange;">
-        <center>
+        <div style="display: grid; place-items: center; height:100%; width:100%">
             <h1> Echangez </h1>
             <form action="{mid}">
-                <input type="submit" value="Continuer" />
+                <input type="submit" value="Continuer" style="
+                    font-size:5em; border-radius:1em"/>
             </form>
-        </center>
+        </div>
     </body>
     </html>
 '''
@@ -36,10 +38,10 @@ end   = 'https://fr.wikipedia.org/wiki/Territorialisme'
 end_html = '''
     <html>
     <body style="background-color:green;">
-        <center>
+        <div style="display: grid; place-items: center; height:100%; width:100%">
             <h1> Bravo, vous avez fini ! </h1>
-            <button onclick='pywebview.api.quit()'>Click me</button>
-        </center>
+            <h2> Envoie automatique des résultats et fin du jeu. </h2>
+        </div>
     </body>
     </html>
 '''
@@ -127,7 +129,7 @@ def aux(window):
                 urls.append(str(current_url))
     timer_off = time.time()
     path = str_list(filter(filter_url, urls))
-    time.sleep(3)
+    time.sleep(5)
     send(path, timer_off - timer_on)
     window.destroy()
 
