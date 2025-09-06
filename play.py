@@ -114,6 +114,8 @@ def send(path, t):
 
 
 def aux(window):
+    while window.get_current_url() == None:
+        pass
     run = True
     timer_on = time.time()
     while run:
