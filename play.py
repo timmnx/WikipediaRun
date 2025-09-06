@@ -5,7 +5,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-team = "Tim et Raph"
+team = input("Joueurs de l'équipe : ")
 
 start = 'https://fr.wikipedia.org/wiki/Cookie_(informatique)'
 start_html = f'''
@@ -20,7 +20,8 @@ start_html = f'''
     </body>
     </html>
 '''
-mid   = 'https://fr.wikipedia.org/wiki/Europe'
+# mid   = 'https://fr.wikipedia.org/wiki/Europe'
+mid   = 'https://fr.wikipedia.org/wiki/Kaamelott'
 mid_html = f'''
     <html>
     <body style="background-color:orange;">
@@ -34,7 +35,8 @@ mid_html = f'''
     </body>
     </html>
 '''
-end   = 'https://fr.wikipedia.org/wiki/Territorialisme'
+# end   = 'https://fr.wikipedia.org/wiki/Territorialisme'
+end   = 'https://fr.wikipedia.org/wiki/OCaml'
 end_html = '''
     <html>
     <body style="background-color:green;">
