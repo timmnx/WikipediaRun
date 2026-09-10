@@ -53,14 +53,11 @@ path = ""
 
 def filter_url(url):
     try:
-        if url == None:
+        if url is None:
             return False
-        elif url.startswith('file://'):
-            return False
-        else:
-            return True
+        return not url.startswith('file://')
     except:
-        print(url, url.type)
+        print(url, None if url is None else url.type)
         return True
 
 def str_list(l):
@@ -122,6 +119,8 @@ def aux(window):
     timer_on = time.time()
     while run:
         current_url = window.get_current_url()
+        if current_url is None:
+            raise ValueError("None")
         if current_url != urls[-1]: #if current url is different of the last saved
             if current_url == mid:
                 window.load_html(mid_html)
