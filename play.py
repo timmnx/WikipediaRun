@@ -1,16 +1,14 @@
 import sys
-import webview
-# from webview.dom import DOMEventHandler
-import time
-import requests
-from bs4 import BeautifulSoup
 
-team = input("Joueurs de l'équipe : ")
+import webview
+import time
+
+debug : bool = "-d" in sys.argv
 
 start = 'https://fr.wikipedia.org/wiki/Cookie_(informatique)'
 start_html = f'''
     <html>
-    <body style="background-color:red;">
+    <body style="background-color:Tomato;">
         <div style="display: grid; place-items: center; height:100%; width:100%">
             <form action="{start}">
                 <input type="submit" value="Commencer" style="
@@ -20,11 +18,12 @@ start_html = f'''
     </body>
     </html>
 '''
-# mid   = 'https://fr.wikipedia.org/wiki/Europe'
-mid   = 'https://fr.wikipedia.org/wiki/Kaamelott'
+
+mid   = 'https://fr.wikipedia.org/wiki/Europe'
+# mid   = 'https://fr.wikipedia.org/wiki/Kaamelott'
 mid_html = f'''
     <html>
-    <body style="background-color:orange;">
+    <body style="background-color:Gold;">
         <div style="display: grid; place-items: center; height:100%; width:100%">
             <h1> Echangez </h1>
             <form action="{mid}">
@@ -35,106 +34,82 @@ mid_html = f'''
     </body>
     </html>
 '''
-# end   = 'https://fr.wikipedia.org/wiki/Territorialisme'
-end   = 'https://fr.wikipedia.org/wiki/OCaml'
-end_html = '''
-    <html>
-    <body style="background-color:green;">
-        <div style="display: grid; place-items: center; height:100%; width:100%">
-            <h1> Bravo, vous avez fini ! </h1>
-            <h2> Envoie automatique des résultats et fin du jeu. </h2>
-        </div>
-    </body>
-    </html>
-'''
 
-urls = [None]
-path = ""
+end   = 'https://fr.wikipedia.org/wiki/Territorialisme'
+# end   = 'https://fr.wikipedia.org/wiki/OCaml'
 
-def filter_url(url):
-    try:
-        if url is None:
-            return False
-        return not url.startswith('file://')
-    except:
-        print(url, None if url is None else url.type)
-        return True
-
-def str_list(l):
+def str_list(l : list[str]) -> str:
     res = ""
+    space = "&nbsp; &nbsp; &nbsp;"
     for e in l:
-        res += str(e).removeprefix("https://fr.wikipedia.org/wiki/") + " -> "
+        res += "<br>"+ space + "->" + e.removeprefix("https://fr.wikipedia.org/wiki/") + space
         # res += str(e) + " -> "
     return res
 
-def send(path, t):
-    # --- Step 1: URL of your Framaform ---
-    form_url = "https://framaforms.org/wikipediarun-1757120534"
+def time_to_str(t : float) -> str:
+    m : int = int(t) // 60
+    s : int = int(t) % 60
+    c : int = int(t*100) % 100
+    if debug: print("time_to_str", t, "->", m,":",s,":",c)
+    return (f"{m} minutes {s} secondes et {c} centièmes")
 
-    # --- Step 2: Start a session ---
-    session = requests.Session()
+def end_html(path, t, team):
+    html = f'''
+        <html>
+        <body style="background-color:LightGreen;">
+            <div style="display: grid; place-items: center; height:100%; width:100%">
+                <h1> Bravo, vous avez fini ! </h1>
+                <h2> Équipe "{team}" : {time_to_str(t)} ! </h2>
 
-    # --- Step 3: GET the form page ---
-    response = session.get(form_url)
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    # --- Step 4: Collect all hidden fields (e.g., CSRF tokens) ---
-    data = {}
-    for hidden in soup.find_all("input", type="hidden"):
-        name = hidden.get("name")
-        value = hidden.get("value", "")
-        if name:
-            data[name] = value
-
-    # --- Step 5: Detect all questions automatically ---
-    questions = []
-    for input_tag in soup.find_all(["input", "textarea", "select"]):
-        name = input_tag.get("name")
-        if not name or name in data:
-            continue  # skip hidden or already collected
-        label = input_tag.get("placeholder") or input_tag.get("title") or name
-        questions.append((label, name))
-
-    # --- Step 6: Ask user for each answer ---
-    for label, name in questions:
-        # answer = input(f"{label}: ")
-        data[name] = f"{team} : {path}{t}s"
-
-    # --- Step 7: Submit the form ---
-    post_url = form_url  # usually the same URL
-    response = session.post(post_url, data=data)
-
-    # --- Step 8: Confirm submission ---
-    if response.status_code == 200:
-        print("Form submitted successfully!")
-    else:
-        print("Failed to submit form. Status code:", response.status_code)
-    print(path)
+                <div style="background-color: white; border-radius:1em; outset: 3em">
+                    <p> {path} <p>
+                </div>
+            </div>
+        </body>
+        </html>
+    '''
+    # html = start_html
+    return html
 
 
-def aux(window):
-    while window.get_current_url() == None:
+urls : list[str|None]= [None]
+timer = None
+urls_not_None = []
+
+def main(window):
+    global timer, urls_not_None
+    if debug: print("here1")
+    while window.get_current_url() is None:
         pass
+    if debug: print("here2")
     run = True
     timer_on = time.time()
     while run:
         current_url = window.get_current_url()
         if current_url is None:
-            raise ValueError("None")
-        if current_url != urls[-1]: #if current url is different of the last saved
+            raise ValueError("None url... should not be possible!")
+        if current_url != urls[-1]: #if current url is different from the last saved
             if current_url == mid:
+                if debug: print("mid:", current_url)
                 window.load_html(mid_html)
             elif current_url == end:
+                if debug: print("end:", current_url)
                 urls.append(str(current_url))
-                window.load_html(end_html)
                 run = False
             else:
+                if debug: print("oth:", current_url)
                 urls.append(str(current_url))
     timer_off = time.time()
-    path = str_list(filter(filter_url, urls))
-    time.sleep(5)
-    send(path, timer_off - timer_on)
+    timer = timer_off - timer_on
+    urls_not_None = [url for url in urls if (url is not None and not url.startswith('file://'))]
     window.destroy()
 
-window = webview.create_window('Wikipedia Run', html=start_html, frameless=True, fullscreen=False, focus=False)
-webview.start(aux, window)
+
+if __name__ == '__main__':
+    team = input("Joueurs de l'équipe : ")
+    window = webview.create_window('Wikipedia Run', html=start_html, frameless=True, fullscreen=False, focus=False)
+    webview.start(main, window)
+    if debug: print("hello world")
+    path = str_list(urls_not_None)
+    window = webview.create_window('Wikipedia Run', html=end_html(path, timer, team), frameless=False, fullscreen=False)
+    webview.start()
